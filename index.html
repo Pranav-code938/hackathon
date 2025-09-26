@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livestock Assessment - FLW Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Language Selection Modal -->
+    <div id="languageModal" class="modal active">
+        <div class="modal-content">
+            <div class="language-header">
+                <i class="fas fa-globe"></i>
+                <h2>Choose Language / भाषा चुनें</h2>
+            </div>
+            <div class="language-grid">
+                <button class="language-btn" data-lang="en">English</button>
+                <button class="language-btn" data-lang="hi">हिंदी</button>
+                <button class="language-btn" data-lang="bn">বাংলা</button>
+                <button class="language-btn" data-lang="te">తెలుగు</button>
+                <button class="language-btn" data-lang="ta">தமிழ்</button>
+                <button class="language-btn" data-lang="mr">मराठी</button>
+                <button class="language-btn" data-lang="gu">ગુજરાતી</button>
+                <button class="language-btn" data-lang="kn">ಕನ್ನಡ</button>
+                <button class="language-btn" data-lang="ml">മലയാളം</button>
+                <button class="language-btn" data-lang="pa">ਪੰਜਾਬੀ</button>
+                <button class="language-btn" data-lang="or">ଓଡ଼ିଆ</button>
+                <button class="language-btn" data-lang="as">অসমীয়া</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-cow"></i>
+                <h1 data-translate="app_title">Cattle Assessment</h1>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <button class="lang-toggle" onclick="openLanguageModal()">
+                    <i class="fas fa-globe"></i>
+                    <span id="currentLang">EN</span>
+                </button>
+                <button class="voice-toggle" id="voiceToggle" onclick="toggleListening()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="help-btn" id="helpBtn">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Voice Commands Pop-down Window -->
+        <div id="voiceCommandsPopup" class="popup">
+            <div class="popup-content">
+                <h3 data-translate="voice_commands_title">Voice Commands</h3>
+                <ul id="voiceCommandsList">
+                    <li><span data-translate="voice_cmd_breed">"Breed" or "नस्ल" to start breed assessment.</span></li>
+                    <li><span data-translate="voice_cmd_health">"Health" or "स्वास्थ्य" to start health check.</span></li>
+                    <li><span data-translate="voice_cmd_age">"Age" or "आयु" to start age estimation.</span></li>
+                    <li><span data-translate="voice_cmd_analyze">"Analyze" or "विश्लेषण" to process the image.</span></li>
+                    <li><span data-translate="voice_cmd_back">"Back" or "वापस" to go back.</span></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Status Banner -->
+    <div id="statusBanner" class="status-banner" style="display: none;"></div>
+
+    <!-- Main Screen -->
+    <main class="main-container" id="mainScreen">
+        <div class="welcome-section">
+            <h2 data-translate="welcome">Welcome to Cattle Assessment Tool</h2>
+            <p data-translate="subtitle">Choose an assessment type for your cattle</p>
+        </div>
+        
+        <div class="action-grid">
+            <div class="action-card" onclick="selectAction('breed')">
+                <div class="card-icon breed-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 data-translate="breed_recognition">Cattle Breed Recognition</h3>
+                <p data-translate="breed_desc">Identify cattle breed from photo</p>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="action-card" onclick="selectAction('health')">
+                <div class="card-icon health-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3 data-translate="health_assessment">Cattle Health Check</h3>
+                <p data-translate="health_desc">Evaluate cattle health condition</p>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="action-card" onclick="selectAction('age')">
+                <div class="card-icon age-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3 data-translate="age_estimation">Cattle Age Estimation</h3>
+                <p data-translate="age_desc">Estimate cattle age from photo</p>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Assessment Screen -->
+    <div class="assessment-screen" id="assessmentScreen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2 id="assessmentTitle"></h2>
+            <button class="speak-btn" id="speakBtn" onclick="speakResults()" style="display: none;">
+                <i class="fas fa-volume-up"></i>
+            </button>
+        </div>
+
+        <div class="assessment-content">
+            
+            <div class="instructions-card">
+                <h3 data-translate="instructions">Instructions</h3>
+                <ul id="instructionsList">
+                </ul>
+            </div>
+
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <div class="camera-container" id="cameraContainer">
+                    <div class="camera-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p data-translate="tap_to_capture">Tap to capture or upload photo</p>
+                    </div>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <img id="capturedImage" style="display: none;" alt="Captured image">
+                </div>
+                
+                <div class="camera-controls">
+                    <button class="camera-btn" id="cameraBtn" onclick="openCamera()">
+                        <i class="fas fa-camera"></i>
+                        <span data-translate="take_photo">Take Photo</span>
+                    </button>
+                    <button class="upload-btn" onclick="uploadPhoto()">
+                        <i class="fas fa-upload"></i>
+                        <span data-translate="upload_photo">Upload Photo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p data-translate="analyzing">Analyzing image...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h3 data-translate="results">Prediction Results</h3>
+                <div class="result-card" id="resultCard">
+                </div>
+                <button class="new-assessment-btn" onclick="showRecordForm()">
+                    <span data-translate="save_record">Save Assessment Record</span>
+                </button>
+            </div>
+
+            <!-- New: Record Form Section -->
+            <div class="record-form-section" id="recordFormSection" style="display: none;">
+                <h3 data-translate="record_form_title">New Assessment Record</h3>
+                <form id="cattleRecordForm" onsubmit="event.preventDefault(); saveRecord()">
+                    <div class="form-group">
+                        <label for="animalId">Animal ID</label>
+                        <input type="text" id="animalId" required placeholder="Enter farm/FLW ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="predictedBreed">Predicted Breed (Auto)</label>
+                        <input type="text" id="predictedBreed" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="confidence">Confidence (%) (Auto)</label>
+                        <input type="number" id="confidence" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="ageCategory">Age Category</label>
+                        <select id="ageCategory" required>
+                            <option value="" disabled selected>Select age range</option>
+                            <option value="Calf (0-1yr)">Calf (0-1yr)</option>
+                            <option value="Heifer (1-3yr)">Heifer (1-3yr)</option>
+                            <option value="Adult (3-8yr)">Adult (3-8yr)</option>
+                            <option value="Senior (>8yr)">Senior (>8yr)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="healthStatus">Health Status</label>
+                        <select id="healthStatus" required>
+                            <option value="" disabled selected>Select status</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Needs Attention">Needs Attention</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="flwId">FLW Personnel ID</label>
+                        <input type="text" id="flwId" required placeholder="FLW Worker ID">
+                    </div>
+                    <button type="submit" class="new-assessment-btn save-btn">
+                        <span data-translate="save_record_btn">Confirm & Save Record</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- New: Records Table Section -->
+            <div class="records-table-section" id="recordsTableSection">
+                <h3 data-translate="data_log_title">Assessment Data Log (BPA Style)</h3>
+                <div class="table-container">
+                    <table id="recordsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Breed</th>
+                                <th>Conf. (%)</th>
+                                <th>Age</th>
+                                <th>Health</th>
+                                <th>FLW ID</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <!-- Records will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+    
+    <!-- Custom Modal/Alert Box for messages (No alert() or confirm()) -->
+    <div id="customAlert" class="modal">
+        <div class="modal-content small-modal">
+            <h4 id="alertTitle" style="color: #667eea; margin-bottom: 0.5rem;"></h4>
+            <p id="alertMessage" style="margin-bottom: 1rem;"></p>
+            <button class="new-assessment-btn" onclick="document.getElementById('customAlert').classList.remove('active')">
+                <span data-translate="ok">OK</span>
+            </button>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
